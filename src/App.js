@@ -10,9 +10,6 @@ import SellNFT from "./components/SellNFT";
 function App() {
   const [loading, setLoading] = useState(false);
 
-  console.log(typeof setLoading)
-  console.log(setLoading)
-
   return (
     <div className="w-screen flex justify-center">
       <div className="container">

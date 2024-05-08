@@ -47,8 +47,6 @@ function Navbar({ loading, setLoading }) {
     if (val) {
       getAddress();
       toggleConnect(val);
-      console.log(typeof setLoading);
-      console.log(setLoading);
       setLoading(false);
     }
 

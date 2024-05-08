@@ -31,7 +31,7 @@ export const uploadJSONToIPFS = async (JSONBody) => {
     });
 };
 
-export const uploadFileToIPFS = async (file) => {
+export const uploadFileToIPFS = async (file, fileName, fileUrl) => {
   const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
   //making axios POST request to Pinata ⬇️
 
@@ -39,9 +39,9 @@ export const uploadFileToIPFS = async (file) => {
   data.append("file", file);
 
   const metadata = JSON.stringify({
-    name: "testname",
+    name: fileName,
     keyvalues: {
-      exampleKey: "exampleValue",
+      url: fileUrl,
     },
   });
   data.append("pinataMetadata", metadata);

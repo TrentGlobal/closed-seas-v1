@@ -19,7 +19,7 @@ export default function SellNFT() {
       //upload the file to IPFS
       setLoading(true);
       updateMessage("Uploading image.. please dont click anything!");
-      const response = await uploadFileToIPFS(file);
+      const response = await uploadFileToIPFS(file, file.name, fileURL);
       if (response.success === true) {
         updateMessage("");
         setFileURL(response.pinataURL);
@@ -33,7 +33,6 @@ export default function SellNFT() {
 
   function handleListNft() {
     setLoading(true);
-    console.log(name, description, price, fileURL);
     listNFT(name, description, price, fileURL)
       .then((res) => {
         alert(`Successfully listed your NFT! Token Address: ${res}`);
