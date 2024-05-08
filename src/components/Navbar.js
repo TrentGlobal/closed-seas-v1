@@ -3,7 +3,11 @@ import { useLocation } from "react-router";
 import { Link } from "react-router-dom";
 import fullLogo from "../full_logo.png";
 
-function Navbar() {
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function Navbar({ loading, setLoading }) {
   const [connected, toggleConnect] = useState(false);
   const location = useLocation();
   const [currAddress, updateAddress] = useState("0x");
@@ -16,16 +20,9 @@ function Navbar() {
     updateAddress(addr);
   }
 
-  function updateButton() {
-    const ethereumButton = document.querySelector(".enableEthereumButton");
-    ethereumButton.textContent = "Connected";
-    ethereumButton.classList.remove("hover:bg-blue-70");
-    ethereumButton.classList.remove("bg-blue-500");
-    ethereumButton.classList.add("hover:bg-green-70");
-    ethereumButton.classList.add("bg-green-500");
-  }
-
   async function connectWebsite() {
+    setLoading(true);
+
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
     if (chainId !== "0xaa36a7") {
       //alert('Incorrect network! Switch your metamask network to Rinkeby');
@@ -37,39 +34,38 @@ function Navbar() {
     await window.ethereum
       .request({ method: "eth_requestAccounts" })
       .then(() => {
-        updateButton();
-        console.log("here");
         getAddress();
         window.location.replace(location.pathname);
       });
+
+    setLoading(false);
   }
 
   useEffect(() => {
     if (window.ethereum == undefined) return;
     let val = window.ethereum.isConnected();
     if (val) {
-      console.log("here");
       getAddress();
       toggleConnect(val);
-      updateButton();
+      setLoading(false);
     }
 
     window.ethereum.on("accountsChanged", function (accounts) {
       window.location.replace(location.pathname);
     });
-  });
+  }, []);
 
   return (
-    <div className="">
-      <nav className="w-screen">
-        <ul className="flex items-end justify-between py-3 bg-transparent text-white pr-5">
+    <div>
+      <nav className="w-full flex">
+        <ul className="flex flex-1 text-gray-900 items-center justify-between px-20 py-10">
           <li className="flex items-end ml-5 pb-2">
             <Link to="/">
               <img
                 src={fullLogo}
                 alt=""
-                width={120}
-                height={120}
+                width={75}
+                height={75}
                 className="inline-block -mt-2"
               />
               <div className="inline-block font-bold text-xl ml-2">
@@ -77,48 +73,50 @@ function Navbar() {
               </div>
             </Link>
           </li>
-          <li className="w-2/6">
-            <ul className="lg:flex justify-between font-bold mr-10 text-lg">
-              {location.pathname === "/" ? (
-                <li className="border-b-2 hover:pb-0 p-2">
-                  <Link to="/">Marketplace</Link>
-                </li>
-              ) : (
-                <li className="hover:border-b-2 hover:pb-0 p-2">
-                  <Link to="/">Marketplace</Link>
-                </li>
+          {location.pathname === "/" ? (
+            <li className="border-b-2 hover:pb-0 p-2">
+              <Link to="/">Marketplace</Link>
+            </li>
+          ) : (
+            <li className="hover:border-b-2 hover:pb-0 p-2">
+              <Link to="/">Marketplace</Link>
+            </li>
+          )}
+          {location.pathname === "/sellNFT" ? (
+            <li className="border-b-2 hover:pb-0 p-2">
+              <Link to="/sellNFT">List My NFT</Link>
+            </li>
+          ) : (
+            <li className="hover:border-b-2 hover:pb-0 p-2">
+              <Link to="/sellNFT">List My NFT</Link>
+            </li>
+          )}
+          {location.pathname === "/profile" ? (
+            <li className="border-b-2 hover:pb-0 p-2">
+              <Link to="/profile">Profile</Link>
+            </li>
+          ) : (
+            <li className="hover:border-b-2 hover:pb-0 p-2">
+              <Link to="/profile">Profile</Link>
+            </li>
+          )}
+          <li>
+            <button
+              className={classNames(
+                connected
+                  ? "bg-green-600  hover:bg-green:400"
+                  : "bg-blue-600  hover:bg-blue:400",
+                "block rounded-md px-3 py-2 text-base font-medium text-gray-100 hover:text-gray-300"
               )}
-              {location.pathname === "/sellNFT" ? (
-                <li className="border-b-2 hover:pb-0 p-2">
-                  <Link to="/sellNFT">List My NFT</Link>
-                </li>
-              ) : (
-                <li className="hover:border-b-2 hover:pb-0 p-2">
-                  <Link to="/sellNFT">List My NFT</Link>
-                </li>
-              )}
-              {location.pathname === "/profile" ? (
-                <li className="border-b-2 hover:pb-0 p-2">
-                  <Link to="/profile">Profile</Link>
-                </li>
-              ) : (
-                <li className="hover:border-b-2 hover:pb-0 p-2">
-                  <Link to="/profile">Profile</Link>
-                </li>
-              )}
-              <li>
-                <button
-                  className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm"
-                  onClick={connectWebsite}
-                >
-                  {connected ? "Connected" : "Connect Wallet"}
-                </button>
-              </li>
-            </ul>
+              onClick={connectWebsite}
+              disabled={loading || connected}
+            >
+              {loading ? "Loading" : connected ? "Connected" : "Connect Wallet"}
+            </button>
           </li>
         </ul>
       </nav>
-      <div className="text-white text-bold text-right mr-10 text-sm">
+      <div className="text-dark text-bold text-right mr-10 text-sm">
         {currAddress !== "0x"
           ? "Connected to"
           : "Not Connected. Please login to view NFTs"}{" "}

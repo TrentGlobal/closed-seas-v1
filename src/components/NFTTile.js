@@ -9,20 +9,27 @@ function NFTTile(data) {
   const IPFSUrl = GetIpfsUrlFromPinata(data.data.image);
 
   return (
-    <Link to={newTo}>
-      <div className="border-2 ml-12 mt-5 mb-12 flex flex-col items-center rounded-lg w-48 md:w-72 shadow-2xl">
+    <div key={data.data.tokenId} className="group relative">
+      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
         <img
           src={IPFSUrl}
           alt=""
-          className="w-72 h-80 rounded-lg object-cover"
-          crossOrigin="anonymous"
+          className="h-full w-full object-cover object-center lg:h-full lg:w-full"
         />
-        <div className="text-white w-full p-2 bg-gradient-to-t from-[#454545] to-transparent rounded-lg pt-5 -mt-20">
-          <strong className="text-xl">{data.data.name}</strong>
-          <p className="display-inline">{data.data.description}</p>
-        </div>
       </div>
-    </Link>
+      <div className="mt-4 flex justify-between">
+        <div>
+          <h3 className="text-sm text-gray-700">
+            <Link to={newTo}>
+              <span aria-hidden="true" className="absolute inset-0" />
+              {data.data.name}
+            </Link>
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">{data.data.description}</p>
+        </div>
+        <p className="text-sm font-medium text-gray-900">{data.data.price} ETH</p>
+      </div>
+    </div>
   );
 }
 

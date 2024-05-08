@@ -1,98 +1,37 @@
-import axios from "axios";
-import { useState } from "react";
-import MarketplaceJSON from "../Marketplace.json";
-import { GetIpfsUrlFromPinata } from "../utils";
-import Navbar from "./Navbar";
+import { useEffect, useState } from "react";
+import { getAllNFTs } from "../services/nftService";
 import NFTTile from "./NFTTile";
+import Spinner from "./Spinner";
 
 export default function Marketplace() {
-  const sampleData = [
-    {
-      name: "NFT#1",
-      description: "First NFT",
-      website: "http://axieinfinity.io",
-      image:
-        "https://gateway.pinata.cloud/ipfs/QmZFdoTH63e9eVbryS2rkEvd43wLb9ZZbWHkWi7ubA3HRg",
-      price: "0.03ETH",
-      currentlySelling: "True",
-      address: "0xe81Bf5A757CB4f7F82a2F23b1e59bE45c33c5b13",
-    },
-    {
-      name: "NFT#2",
-      description: "Second NFT",
-      website: "http://axieinfinity.io",
-      image:
-        "https://gateway.pinata.cloud/ipfs/QmZFdoTH63e9eVbryS2rkEvd43wLb9ZZbWHkWi7ubA3HRg",
-      price: "0.03ETH",
-      currentlySelling: "True",
-      address: "0xe81Bf5A757C4f7F82a2F23b1e59bE45c33c5b13",
-    },
-    {
-      name: "NFT#3",
-      description: "Third NFT",
-      website: "http://axieinfinity.io",
-      image:
-        "https://gateway.pinata.cloud/ipfs/QmZFdoTH63e9eVbryS2rkEvd43wLb9ZZbWHkWi7ubA3HRg",
-      price: "0.03ETH",
-      currentlySelling: "True",
-      address: "0xe81Bf5A757C4f7F82a2F23b1e59bE45c33c5b13",
-    },
-  ];
-  const [data, updateData] = useState(sampleData);
-  const [dataFetched, updateFetched] = useState(false);
+  const [data, updateData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  async function getAllNFTs() {
-    const ethers = require("ethers");
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      MarketplaceJSON.address,
-      MarketplaceJSON.abi,
-      signer
-    );
-    //create an NFT Token
-    let transaction = await contract.getAllNFTs();
-
-    //Fetch all the details of every NFT from the contract and display
-    const items = await Promise.all(
-      transaction.map(async (i) => {
-        var tokenURI = await contract.tokenURI(i.tokenId);
-        console.log("getting this tokenUri", tokenURI);
-        tokenURI = GetIpfsUrlFromPinata(tokenURI);
-        let meta = await axios.get(tokenURI);
-        meta = meta.data;
-
-        let price = ethers.utils.formatUnits(i.price.toString(), "ether");
-        let item = {
-          price,
-          tokenId: i.tokenId.toNumber(),
-          seller: i.seller,
-          owner: i.owner,
-          image: meta.image,
-          name: meta.name,
-          description: meta.description,
-        };
-        return item;
+  useEffect(() => {
+    setLoading(true);
+    getAllNFTs()
+      .then((nfts) => {
+        updateData(nfts);
       })
-    );
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
-    updateFetched(true);
-    updateData(items);
-  }
-
-  if (!dataFetched) getAllNFTs();
+  if (loading) return <Spinner />;
 
   return (
-    <div>
-      <Navbar></Navbar>
-      <div className="flex flex-col place-items-center mt-20">
-        <div className="md:text-xl font-bold text-white">Top NFTs</div>
-        <div className="flex mt-5 justify-between flex-wrap max-w-screen-xl text-center">
-          {data.map((value, index) => {
-            return <NFTTile data={value} key={index}></NFTTile>;
-          })}
+    <div className="bg-white">
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+          NFTs Available
+        </h2>
+
+        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+          {data.map((value, index) => (
+            <NFTTile data={value} key={index} />
+          ))}
         </div>
       </div>
     </div>
